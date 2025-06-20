@@ -17,6 +17,7 @@ A estrutura foi organizada em pastas e comandos padronizados, todos acionados co
 
 📁 ESTRUTURA DO PROJETO
 
+```text
 OROCHIMARU/
 ├── comandos/
 │   ├── cadastro/
@@ -49,7 +50,7 @@ OROCHIMARU/
 │   └── outros/
 │       ├── sorteio.js, gbingo.js, top5.js, etc.
 ├── lib/
-│   ├── db.js                 ← Banco SQLite
+│   ├── db.js
 │   ├── scraping/
 │   │   ├── giros.js
 │   │   ├── calendario.js
@@ -59,6 +60,7 @@ OROCHIMARU/
 │   │   └── cartasraras.json
 ├── media/
 │   └── vídeos e imagens de apoio
+```
 
 
 
