@@ -1,1 +1,7 @@
-
+{
+  "data": "2025-06-20",
+  "cartas": {
+    "Muito Alto": ["Harriet Assombrada", "Simon Assustador", "Spike"],
+    "Alto": ["Coração de Máquina", "Dr. Ashtear"]
+  }
+}
