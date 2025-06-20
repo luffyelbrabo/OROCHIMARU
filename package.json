@@ -1,21 +1,16 @@
 {
   "name": "orochimaru",
   "version": "1.0.0",
+  "description": "Bot OROCHIMARU para WhatsApp usando Baileys",
   "main": "index.js",
-  "type": "commonjs",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "^6.7.0",
+    "@whiskeysockets/baileys": "^6.5.0",
     "axios": "^1.6.8",
-    "moment": "^2.29.4",
-    "ffmpeg-static": "^5.1.0",
-    "fluent-ffmpeg": "^2.1.2",
-    "google-tts-api": "^2.0.1",
-    "chalk": "^5.3.0",
-    "form-data": "^4.0.0",
     "cheerio": "^1.0.0-rc.12",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "pino": "^8.17.0"
   }
 }
