@@ -1,0 +1,17 @@
+# Pasta com dados da sessão do WhatsApp
+auth/
+
+# Banco de dados local
+*.db
+
+# Node modules (instalado automaticamente no Railway)
+node_modules/
+
+# Arquivos de log
+*.log
+
+# Variáveis de ambiente, se usar futuramente
+.env
+
+# Cache temporário
+.cache/
