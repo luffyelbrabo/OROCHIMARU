@@ -1,7 +1,7 @@
 module.exports = {
   prefix: '*',
   nomeBot: 'OROCHIMARU',
-  dono: ['+5521967687736'],
+  dono: ['+5521983480380'],
   grupoSuporte: 'https://chat.whatsapp.com/LRsQdlapXsqA8bNRIORMRc',
 
   // 🔑 Chave da OpenAI (IA do comando /audiobot)
