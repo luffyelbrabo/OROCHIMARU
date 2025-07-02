@@ -2,39 +2,28 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
-const { Boom } = require('@hapi/boom');
-const pino = require('pino');
-const QRCode = require('qrcode');
-
-const comandos = require('./lib/functions');
-const { buscarTodosEventos } = require('./lib/scraping/eventos');
-const authFolder = './auth';
-
-let ultimoQrDataUrl = '';
-
 app.get('/', (req, res) => {
-  res.send('Bot OROCHIMARU rodando no Render! Acesse <a href="/qrcode">/qrcode</a> para escanear o QR code.');
-});
-
-app.get('/qrcode', (req, res) => {
-  if (ultimoQrDataUrl) {
-    res.send(`
-      <html>
-        <body>
-          <h1>Escaneie o QR code</h1>
-          <img src="${ultimoQrDataUrl}" />
-        </body>
-      </html>
-    `);
-  } else {
-    res.send('QR code ainda não gerado. Aguarde o bot inicializar.');
-  }
+  res.send('Bot OROCHIMARU rodando no Render!');
 });
 
 app.listen(PORT, () => {
   console.log(`Servidor web escutando na porta ${PORT}`);
 });
+
+// ---------------------------
+// SEU BOT WHATSAPP
+// ---------------------------
+const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const { Boom } = require('@hapi/boom');
+const pino = require('pino');
+const fs = require('fs');
+const path = require('path');
+const qrcode = require('qrcode-terminal');
+
+const comandos = require('./lib/functions');
+const { checkNovosEventos } = require('./lib/scraping/eventos');
+
+const authFolder = './auth';
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState(authFolder);
@@ -50,14 +39,8 @@ async function startBot() {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
-      QRCode.toDataURL(qr, (err, url) => {
-        if (!err) {
-          ultimoQrDataUrl = url;
-          console.log('🌐 QR code disponível em: /qrcode');
-        } else {
-          console.error('❌ Erro ao gerar QR:', err);
-        }
-      });
+      console.log('📱 QR CODE recebido! Escaneie no WhatsApp:');
+      qrcode.generate(qr, { small: true });
     }
 
     if (connection === 'close') {
@@ -75,7 +58,7 @@ async function startBot() {
     if (!m.message || m.key.fromMe) return;
 
     const body = m.message.conversation || m.message.extendedTextMessage?.text || '';
-    const comando = body.toLowerCase().split(' ')[0];
+    const comando = body.toLowerCase().split(' ')[0].replace(/^\*/, ''); // Remove o *
 
     const from = m.key.remoteJid;
     const sender = m.key.participant || m.key.remoteJid;
@@ -84,15 +67,15 @@ async function startBot() {
   });
 
   setInterval(async () => {
-  const eventos = await buscarTodosEventos();
-  if (eventos.length) {
-    for (const evento of eventos) {
-      await sock.sendMessage('120363XXXXX@g.us', {
-        text: `📢 *Link de Giros!*\n📝 ${evento.titulo}\n🔗 ${evento.link}`
-      });
+    const novosEventos = await checkNovosEventos();
+    if (novosEventos.length) {
+      for (const evento of novosEventos) {
+        await sock.sendMessage('120363XXXXX@g.us', {
+          text: `📢 *Novo Evento Detectado!*\n\n📝 *${evento.titulo}*\n🔗 ${evento.link}`,
+        });
+      }
     }
-  }
-}, 5 * 60 * 1000);
-    }
+  }, 5 * 60 * 1000);
+}
 
 startBot();
