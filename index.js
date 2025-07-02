@@ -8,8 +8,7 @@ const pino = require('pino');
 const QRCode = require('qrcode');
 
 const comandos = require('./lib/functions');
-const { checkNovosEventos } = require('./lib/scraping/eventos');
-
+const { buscarTodosEventos } = require('./lib/scraping/eventos');
 const authFolder = './auth';
 
 let ultimoQrDataUrl = '';
@@ -85,15 +84,15 @@ async function startBot() {
   });
 
   setInterval(async () => {
-    const novosEventos = await checkNovosEventos();
-    if (novosEventos.length) {
-      for (const evento of novosEventos) {
-        await sock.sendMessage('120363XXXXX@g.us', {
-          text: `📢 *Novo Evento Detectado!*\n\n📝 *${evento.titulo}*\n🔗 ${evento.link}`,
-        });
-      }
+  const eventos = await buscarTodosEventos();
+  if (eventos.length) {
+    for (const evento of eventos) {
+      await sock.sendMessage('120363XXXXX@g.us', {
+        text: `📢 *Link de Giros!*\n📝 ${evento.titulo}\n🔗 ${evento.link}`
+      });
     }
-  }, 5 * 60 * 1000);
-}
+  }
+}, 5 * 60 * 1000);
+    }
 
 startBot();
