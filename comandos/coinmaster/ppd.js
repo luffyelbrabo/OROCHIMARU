@@ -1,4 +1,4 @@
-const db = require('../../lib/db');
+const db = require('../../tmp/db');
 const moment = require('moment'); // já incluso no package.json
 
 module.exports = {
