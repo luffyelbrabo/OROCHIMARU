@@ -18,6 +18,7 @@ const { Boom } = require('@hapi/boom');
 const pino = require('pino');
 const fs = require('fs');
 const path = require('path');
+const qrcode = require('qrcode-terminal');
 
 const comandos = require('./lib/functions');
 const { checkNovosEventos } = require('./lib/scraping/eventos');
@@ -38,7 +39,8 @@ async function startBot() {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
-      console.log('📱 QR CODE recebido! Escaneie no WhatsApp:\n', qr);
+      console.log('📱 QR CODE recebido! Escaneie no WhatsApp:');
+      qrcode.generate(qr, { small: true });
     }
 
     if (connection === 'close') {
