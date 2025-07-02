@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js"
   },
-  "author": "Douglas Correa Baptista",
+  "author": "luffyelbrabo",
   "license": "MIT",
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.0",
@@ -19,6 +19,7 @@
     "google-tts-api": "^2.0.1",
     "sqlite3": "^5.1.6",
     "moment": "^2.29.4",
-    "jimp": "^0.16.1"
+    "jimp": "^0.16.1",
+    "qrcode-terminal": "^0.12.0"
   }
 }
