@@ -1,0 +1,22 @@
+# Banco de dados local
+*.db
+
+# Node modules (instalado automaticamente no Railway / Render)
+node_modules/
+
+# Arquivos de log
+*.log
+
+# Variáveis de ambiente, se usar futuramente
+.env
+
+# Cache temporário
+.cache/
+
+# ⚠️ IMPORTANTE:
+# Removemos o "auth/" para permitir subir no deploy SE você precisar.
+# NUNCA suba para um repositório PÚBLICO. Use privado ou ignore no GitHub.
+# auth/
+
+# Se quiser permitir no Render, mas continuar ignorando no GitHub:
+# Você pode criar um arquivo separado de ignore no GitHub, ex: .gitignore.github
