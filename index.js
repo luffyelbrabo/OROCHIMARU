@@ -2,22 +2,17 @@ const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const QRCode = require('qrcode');
-
-let ultimoQR = '';
+let ultimoQrCode = null;
 
 app.get('/', (req, res) => {
   res.send('Bot OROCHIMARU rodando no Render!');
 });
 
-app.get('/qrcode', async (req, res) => {
-  if (!ultimoQR) return res.send('QR code ainda não gerado.');
-
-  try {
-    const url = await QRCode.toDataURL(ultimoQR);
-    res.send(`<h2>Escaneie o QR code abaixo no seu WhatsApp:</h2><img src="${url}" />`);
-  } catch (e) {
-    res.send('Erro ao gerar o QR code.');
+app.get('/qrcode', (req, res) => {
+  if (ultimoQrCode) {
+    res.send(`<img src="${ultimoQrCode}" />`);
+  } else {
+    res.send('Nenhum QR Code disponível no momento.');
   }
 });
 
@@ -25,16 +20,9 @@ app.listen(PORT, () => {
   console.log(`Servidor web escutando na porta ${PORT}`);
 });
 
-// ---------------------------
-// SEU BOT WHATSAPP
-// ---------------------------
 const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
 const { Boom } = require('@hapi/boom');
 const pino = require('pino');
-const fs = require('fs');
-const path = require('path');
-const qrcodeTerminal = require('qrcode-terminal');
-
 const comandos = require('./lib/functions');
 const { checkNovosEventos } = require('./lib/scraping/eventos');
 
@@ -54,9 +42,10 @@ async function startBot() {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
-      ultimoQR = qr;
-      console.log('📱 QR CODE disponível no terminal e no navegador em: /qrcode');
-      qrcodeTerminal.generate(qr, { small: true });
+      // Convertemos o QR em um Data URL (para exibir no navegador)
+      const qrImage = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&size=300x300`;
+      ultimoQrCode = qrImage;
+      console.log(`📱 Novo QR gerado! Acesse: /qrcode`);
     }
 
     if (connection === 'close') {
@@ -66,6 +55,7 @@ async function startBot() {
 
     if (connection === 'open') {
       console.log('✅ Bot conectado ao WhatsApp!');
+      ultimoQrCode = null; // Limpa o QR ao conectar
     }
   });
 
@@ -74,7 +64,7 @@ async function startBot() {
     if (!m.message || m.key.fromMe) return;
 
     const body = m.message.conversation || m.message.extendedTextMessage?.text || '';
-    const comando = body.toLowerCase().split(' ')[0].replace(/^\*/, ''); // Remove o *
+    const comando = body.toLowerCase().split(' ')[0].replace(/^\*/, '');
 
     const from = m.key.remoteJid;
     const sender = m.key.participant || m.key.remoteJid;
