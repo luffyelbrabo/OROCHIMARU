@@ -1,5 +1,3 @@
-// 📄 OROCHIMARU/comandos/cadastro/ranking.js
-
 const db = require('../../tmp/db');
 
 module.exports = {
