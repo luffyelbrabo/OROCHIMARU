@@ -24,7 +24,12 @@ const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysocket
 const { Boom } = require('@hapi/boom');
 const pino = require('pino');
 const comandos = require('./lib/functions');
-const { checkNovosEventos } = require('./lib/scraping/eventos');
+let checkNovosEventos;
+try {
+  ({ checkNovosEventos } = require('./lib/scraping/eventos'));
+} catch {
+  console.warn('⚠️ checkNovosEventos não foi carregado. Ignorando checagem de eventos.');
+}
 
 const authFolder = './auth';
 
@@ -42,7 +47,6 @@ async function startBot() {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
-      // Convertemos o QR em um Data URL (para exibir no navegador)
       const qrImage = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&size=300x300`;
       ultimoQrCode = qrImage;
       console.log(`📱 Novo QR gerado! Acesse: /qrcode`);
@@ -50,12 +54,13 @@ async function startBot() {
 
     if (connection === 'close') {
       const motivo = new Boom(lastDisconnect?.error)?.output?.statusCode;
+      console.log(`🔌 Conexão encerrada (${motivo || 'desconhecido'}). Tentando reconectar...`);
       if (motivo !== 401) startBot();
     }
 
     if (connection === 'open') {
       console.log('✅ Bot conectado ao WhatsApp!');
-      ultimoQrCode = null; // Limpa o QR ao conectar
+      ultimoQrCode = null;
     }
   });
 
@@ -64,7 +69,11 @@ async function startBot() {
     if (!m.message || m.key.fromMe) return;
 
     const body = m.message.conversation || m.message.extendedTextMessage?.text || '';
-    const comando = body.toLowerCase().split(' ')[0].replace(/^\*/, '');
+    const comandoRaw = body.split(' ')[0] || '';
+    const comando = comandoRaw.replace(/^\*/, '').toLowerCase();
+
+    console.log(`📥 Mensagem recebida: ${body}`);
+    console.log(`👉 Comando detectado: ${comando}`);
 
     const from = m.key.remoteJid;
     const sender = m.key.participant || m.key.remoteJid;
@@ -72,16 +81,18 @@ async function startBot() {
     comandos.executarComando(comando, sock, m, from, sender);
   });
 
-  setInterval(async () => {
-    const novosEventos = await checkNovosEventos();
-    if (novosEventos.length) {
-      for (const evento of novosEventos) {
-        await sock.sendMessage('120363XXXXX@g.us', {
-          text: `📢 *Novo Evento Detectado!*\n\n📝 *${evento.titulo}*\n🔗 ${evento.link}`,
-        });
+  if (checkNovosEventos) {
+    setInterval(async () => {
+      const novosEventos = await checkNovosEventos();
+      if (novosEventos.length) {
+        for (const evento of novosEventos) {
+          await sock.sendMessage('120363XXXXX@g.us', {
+            text: `📢 *Novo Evento Detectado!*\n\n📝 *${evento.titulo}*\n🔗 ${evento.link}`,
+          });
+        }
       }
-    }
-  }, 5 * 60 * 1000);
+    }, 5 * 60 * 1000);
+  }
 }
 
 startBot();
