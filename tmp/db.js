@@ -44,7 +44,8 @@ db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS eventos (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nome_evento TEXT UNIQUE,
+      nome_evento TEXT,
+      horario_detectado TEXT,
       dados TEXT,
       data_atualizacao TEXT
     )
@@ -56,6 +57,15 @@ db.serialize(() => {
       tipo TEXT,
       link TEXT,
       data_coleta TEXT
+    )
+  `);
+
+  // NOVA TABELA PARA GRUPOS
+  db.run(`
+    CREATE TABLE IF NOT EXISTS grupos (
+      id TEXT PRIMARY KEY,
+      nome TEXT,
+      data_adicionado TEXT
     )
   `);
 });
