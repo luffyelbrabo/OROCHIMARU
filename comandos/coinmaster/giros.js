@@ -1,31 +1,31 @@
 const { getLinksGiros } = require('../../lib/scraping/giros');
-const axios = require('axios'); // Para salvar no seu backend Render
+const axios = require('axios');
 
 module.exports = {
   comando: 'giros',
-  descricao: 'Exibe links atualizados de giros Coin Master com links personalizados',
+  descricao: 'Exibe links atualizados de giros Coin Master com data de postagem e redirecionamento personalizado',
   categoria: 'coinmaster',
   exec: async (m, { sock }) => {
     const links = await getLinksGiros();
 
     if (!links.length) {
-      await sock.sendMessage(m.chat, { text: '⚠️ Nenhum link de giro disponível no momento.' }, { quoted: m });
+      await sock.sendMessage(m.chat, {
+        text: '⚠️ Nenhum link de giro disponível no momento.'
+      }, { quoted: m });
       return;
     }
 
-    // Gerar códigos personalizados e salvar no backend
     const baseRedirect = 'https://orochimaru-bv2e.onrender.com/';
     let resposta = '🎰 *Links de Giros Coin Master:*\n\n';
 
-    for (const link of links) {
-      // Solicita ao seu backend gerar um código
+    for (const { url, dataHora } of links) {
       try {
-        const res = await axios.post(`${baseRedirect}api/salvar`, { link });
-        const code = res.data.code; // Exemplo: 192, sk9
+        const res = await axios.post(`${baseRedirect}api/salvar`, { link: url });
+        const code = res.data.code;
 
-        resposta += `🎁 ${baseRedirect}${code}\n\n`;
+        resposta += `🎁 ${baseRedirect}${code}\n📅 Postado em: ${dataHora}\n\n`;
       } catch (err) {
-        resposta += `⚠️ Erro ao gerar link para: ${link}\n\n`;
+        resposta += `⚠️ Erro ao gerar link para: ${url}\n\n`;
       }
     }
 
